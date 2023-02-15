@@ -1,7 +1,6 @@
 package it.unimore.fum.iot.smartIrrigation.process;
 
 import it.unimore.fum.iot.smartIrrigation.device.PeopCountMQTTSmartObject;
-import it.unimore.fum.iot.smartIrrigation.resource.IrrigationControllerSmartObjectResource;
 import it.unimore.fum.iot.smartIrrigation.resource.PeopleCounterSmartObjectResource;
 import it.unimore.fum.iot.smartIrrigation.resource.PresenceSensorResource;
 import org.eclipse.paho.client.mqttv3.IMqttClient;
@@ -15,8 +14,8 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.UUID;
 
-import static it.unimore.fum.iot.smartIrrigation.process.MQTTConfigurationParameters.BROKER_ADDRESS;
-import static it.unimore.fum.iot.smartIrrigation.process.MQTTConfigurationParameters.BROKER_PORT;
+import static it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters.BROKER_ADDRESS;
+import static it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters.BROKER_PORT;
 
 /**
  * @author Marco Picone, Ph.D. - picone.m@gmail.com

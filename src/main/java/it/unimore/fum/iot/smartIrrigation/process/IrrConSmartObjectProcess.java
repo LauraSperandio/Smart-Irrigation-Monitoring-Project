@@ -2,7 +2,6 @@ package it.unimore.fum.iot.smartIrrigation.process;
 
 
 import it.unimore.fum.iot.smartIrrigation.device.IrrConMQTTSmartObject;
-import it.unimore.fum.iot.smartIrrigation.resource.EnvironmentalMonitoringSmartObjectResource;
 import it.unimore.fum.iot.smartIrrigation.resource.IrrigationControllerSmartObjectResource;
 import it.unimore.fum.iot.smartIrrigation.resource.IrrigationSensorActuatorResource;
 import org.eclipse.paho.client.mqttv3.IMqttClient;
@@ -16,8 +15,8 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.UUID;
 
-import static it.unimore.fum.iot.smartIrrigation.process.MQTTConfigurationParameters.BROKER_ADDRESS;
-import static it.unimore.fum.iot.smartIrrigation.process.MQTTConfigurationParameters.BROKER_PORT;
+import static it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters.BROKER_ADDRESS;
+import static it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters.BROKER_PORT;
 
 
 public class IrrConSmartObjectProcess {

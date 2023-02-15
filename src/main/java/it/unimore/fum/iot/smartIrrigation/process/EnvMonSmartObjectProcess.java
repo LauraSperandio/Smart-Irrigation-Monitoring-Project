@@ -1,7 +1,6 @@
 package it.unimore.fum.iot.smartIrrigation.process;
 
 import it.unimore.fum.iot.smartIrrigation.device.EnvMonMQTTSmartObject;
-import it.unimore.fum.iot.smartIrrigation.device.IrrConMQTTSmartObject;
 import it.unimore.fum.iot.smartIrrigation.resource.*;
 import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -14,8 +13,8 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.UUID;
 
-import static it.unimore.fum.iot.smartIrrigation.process.MQTTConfigurationParameters.MQTT_PASSWORD;
-import static it.unimore.fum.iot.smartIrrigation.process.MQTTConfigurationParameters.MQTT_USERNAME;
+import static it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters.MQTT_PASSWORD;
+import static it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters.MQTT_USERNAME;
 
 public class EnvMonSmartObjectProcess {
 

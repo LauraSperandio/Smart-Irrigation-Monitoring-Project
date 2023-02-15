@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Optional;
 import java.util.UUID;
 
-import static it.unimore.fum.iot.smartIrrigation.process.MQTTConfigurationParameters.BROKER_ADDRESS;
-import static it.unimore.fum.iot.smartIrrigation.process.MQTTConfigurationParameters.BROKER_PORT;
+import static it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters.BROKER_ADDRESS;
+import static it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters.BROKER_PORT;
 
 public class BatteryMonitoringEMConsumer {
 

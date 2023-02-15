@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-import static it.unimore.fum.iot.smartIrrigation.process.MQTTConfigurationParameters.MQTT_BASIC_TOPIC;
+import static it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters.MQTT_BASIC_TOPIC;
 
 public class EnvMonMQTTSmartObject {
     private static final Logger logger = LoggerFactory.getLogger(EnvMonMQTTSmartObject.class);
