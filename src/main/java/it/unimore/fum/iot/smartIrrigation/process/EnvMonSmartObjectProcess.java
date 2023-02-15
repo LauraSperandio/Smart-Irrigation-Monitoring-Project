@@ -2,6 +2,7 @@ package it.unimore.fum.iot.smartIrrigation.process;
 
 import it.unimore.fum.iot.smartIrrigation.device.EnvMonMQTTSmartObject;
 import it.unimore.fum.iot.smartIrrigation.resource.*;
+import it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters;
 import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
@@ -13,16 +14,10 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.UUID;
 
-import static it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters.MQTT_PASSWORD;
-import static it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters.MQTT_USERNAME;
 
 public class EnvMonSmartObjectProcess {
 
     private static final Logger logger = LoggerFactory.getLogger(EnvMonSmartObjectProcess.class);
-
-//    private static final String MQTT_USERNAME = "262716@studenti.unimore.it";
-
-//    private static final String MQTT_PASSWORD = "ewmwmyijckwrxgdx";
 
     public static void main(String[] args) {
 
@@ -34,8 +29,8 @@ public class EnvMonSmartObjectProcess {
             //Create MQTT Client
             MqttClientPersistence persistence = new MemoryPersistence();
             IMqttClient mqttClient = new MqttClient(String.format("tcp://%s:%s",
-                    MQTT_USERNAME,
-                    MQTT_PASSWORD),
+                    MQTTConfigurationParameters.BROKER_ADDRESS,
+                    MQTTConfigurationParameters.BROKER_PORT),
                     envMonId,
                     persistence);
 
@@ -43,6 +38,9 @@ public class EnvMonSmartObjectProcess {
             options.setAutomaticReconnect(true);
             options.setCleanSession(true);
             options.setConnectionTimeout(10);
+
+            options.setUserName(MQTTConfigurationParameters.MQTT_USERNAME);
+            options.setPassword((MQTTConfigurationParameters.MQTT_PASSWORD).toCharArray());
 
             //Connect to MQTT Broker
             mqttClient.connect(options);

@@ -3,6 +3,7 @@ package it.unimore.fum.iot.smartIrrigation.process;
 import it.unimore.fum.iot.smartIrrigation.device.PeopCountMQTTSmartObject;
 import it.unimore.fum.iot.smartIrrigation.resource.PeopleCounterSmartObjectResource;
 import it.unimore.fum.iot.smartIrrigation.resource.PresenceSensorResource;
+import it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters;
 import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
@@ -14,14 +15,8 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.UUID;
 
-import static it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters.BROKER_ADDRESS;
-import static it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters.BROKER_PORT;
 
-/**
- * @author Marco Picone, Ph.D. - picone.m@gmail.com
- * @project mqtt-demo-fleet-monitoring
- * @created 04/11/2020 - 16:15
- */
+
 public class PeopCountSmartObjectProcess {
 
     private static final Logger logger = LoggerFactory.getLogger(PeopCountSmartObjectProcess.class);
@@ -40,8 +35,8 @@ public class PeopCountSmartObjectProcess {
             //Create MQTT Client
             MqttClientPersistence persistence = new MemoryPersistence();
             IMqttClient mqttClient = new MqttClient(String.format("tcp://%s:%s",
-                    BROKER_ADDRESS,
-                    BROKER_PORT),
+                    MQTTConfigurationParameters.BROKER_ADDRESS,
+                    MQTTConfigurationParameters.BROKER_PORT),
                     peopCountID,
                     persistence);
 
@@ -49,6 +44,9 @@ public class PeopCountSmartObjectProcess {
             options.setAutomaticReconnect(true);
             options.setCleanSession(true);
             options.setConnectionTimeout(10);
+
+            options.setUserName(MQTTConfigurationParameters.MQTT_USERNAME);
+            options.setPassword((MQTTConfigurationParameters.MQTT_PASSWORD).toCharArray());
 
             //Connect to MQTT Broker
             mqttClient.connect(options);

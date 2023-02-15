@@ -4,6 +4,7 @@ package it.unimore.fum.iot.smartIrrigation.process;
 import it.unimore.fum.iot.smartIrrigation.device.IrrConMQTTSmartObject;
 import it.unimore.fum.iot.smartIrrigation.resource.IrrigationControllerSmartObjectResource;
 import it.unimore.fum.iot.smartIrrigation.resource.IrrigationSensorActuatorResource;
+import it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters;
 import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
@@ -15,8 +16,6 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.UUID;
 
-import static it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters.BROKER_ADDRESS;
-import static it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters.BROKER_PORT;
 
 
 public class IrrConSmartObjectProcess {
@@ -37,8 +36,8 @@ public class IrrConSmartObjectProcess {
             //Create MQTT Client
             MqttClientPersistence persistence = new MemoryPersistence();
             IMqttClient mqttClient = new MqttClient(String.format("tcp://%s:%s",
-                    BROKER_ADDRESS,
-                    BROKER_PORT),
+                    MQTTConfigurationParameters.BROKER_ADDRESS,
+                    MQTTConfigurationParameters.BROKER_PORT),
                     irrConID,
                     persistence);
 
@@ -46,6 +45,9 @@ public class IrrConSmartObjectProcess {
             options.setAutomaticReconnect(true);
             options.setCleanSession(true);
             options.setConnectionTimeout(10);
+
+            options.setUserName(MQTTConfigurationParameters.MQTT_USERNAME);
+            options.setPassword((MQTTConfigurationParameters.MQTT_PASSWORD).toCharArray());
 
             //Connect to MQTT Broker
             mqttClient.connect(options);

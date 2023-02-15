@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.unimore.fum.iot.smartIrrigation.message.TelemetryMessage;
 import it.unimore.fum.iot.smartIrrigation.resource.*;
+import it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters;
 import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -20,7 +21,7 @@ public class EnvMonMQTTSmartObject {
 
 //    private static final String BASIC_TOPIC = "/iot/smartIrrigation/env-mon";
 
-    private static final String TELEMETRY_ENV_MON_TOPIC = "env-mon";
+//    private static final String TELEMETRY_ENV_MON_TOPIC = "env-mon";
 
     private String envMonId;
 
@@ -84,7 +85,7 @@ public class EnvMonMQTTSmartObject {
 
 
                                 try {
-                                    publishTelemetryData(String.format("%s/%s/%s/%s", MQTT_BASIC_TOPIC, envMonId, TELEMETRY_ENV_MON_TOPIC, resourceEntry.getKey()),
+                                    publishTelemetryData(String.format("%s/%s/%s/%s", MQTT_BASIC_TOPIC, envMonId, MQTTConfigurationParameters.TELEMETRY_ENV_MON_TOPIC, resourceEntry.getKey()),
                                             new TelemetryMessage(environmentalMonitoringSmartObjectResource.getType(), updatedValue));
                                 } catch (MqttException | JsonProcessingException e) {
                                     e.printStackTrace();
