@@ -6,31 +6,31 @@ public class IrrigationControllerDescriptor {
 
     public static final String RANDOM_PROVIDER = "random_provider";*/
 
-    private String accensione;
+    private Boolean accensione;
 
     private String policyConfiguration;
 
     private String livelloIrrigazione;
 
-    private String tipologiaIrrigazione;
+    private Boolean tipologiaIrrigazione;
 
 //    private String provider;
 
     public IrrigationControllerDescriptor() {
     }
 
-    public IrrigationControllerDescriptor(String accensione, String policyConfiguration, String livelloIrrigazione, String tipologiaIrrigazione) {
+    public IrrigationControllerDescriptor(Boolean accensione, String policyConfiguration, String livelloIrrigazione, Boolean tipologiaIrrigazione) {
         this.accensione = accensione;
         this.policyConfiguration = policyConfiguration;
         this.livelloIrrigazione = livelloIrrigazione;
         this.tipologiaIrrigazione = tipologiaIrrigazione;
     }
 
-    public String getAccensione() {
+    public Boolean getAccensione() {
         return accensione;
     }
 
-    public void setAccensione(String accensione) {
+    public void setAccensione(Boolean accensione) {
         this.accensione = accensione;
     }
 
@@ -50,11 +50,11 @@ public class IrrigationControllerDescriptor {
         this.livelloIrrigazione = livelloIrrigazione;
     }
 
-    public String getTipologiaIrrigazione() {
+    public Boolean getTipologiaIrrigazione() {
         return tipologiaIrrigazione;
     }
 
-    public void setTipologiaIrrigazione(String tipologiaIrrigazione) {
+    public void setTipologiaIrrigazione(Boolean tipologiaIrrigazione) {
         this.tipologiaIrrigazione = tipologiaIrrigazione;
     }
 

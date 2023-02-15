@@ -14,6 +14,9 @@ import org.slf4j.LoggerFactory;
 import java.util.Optional;
 import java.util.UUID;
 
+import static it.unimore.fum.iot.smartIrrigation.process.MQTTConfigurationParameters.BROKER_ADDRESS;
+import static it.unimore.fum.iot.smartIrrigation.process.MQTTConfigurationParameters.BROKER_PORT;
+
 public class BatteryMonitoringEMConsumer {
 
     private static final String CONTROL_TOPIC = "control";
@@ -23,10 +26,10 @@ public class BatteryMonitoringEMConsumer {
     private final static Logger logger = LoggerFactory.getLogger(BatteryMonitoringEMConsumer.class);
 
     //IP Address of the target MQTT Broker
-    private static String BROKER_ADDRESS = "155.185.228.20";
+//    private static String BROKER_ADDRESS = "155.185.228.20";
 
     //PORT of the target MQTT Broker
-    private static int BROKER_PORT = 7883;
+//    private static int BROKER_PORT = 7883;
 
     private static final String TARGET_TOPIC = "/iot/smartIrrigation/env-mon/+/telemetry/battery";
 

@@ -15,32 +15,32 @@ import java.util.Map;
 
 import static it.unimore.fum.iot.smartIrrigation.process.MQTTConfigurationParameters.MQTT_BASIC_TOPIC;
 
-public class EnvMonMQTTSmartObject {
-    private static final Logger logger = LoggerFactory.getLogger(EnvMonMQTTSmartObject.class);
+public class PeopCountMQTTSmartObject {
+    private static final Logger logger = LoggerFactory.getLogger(PeopCountMQTTSmartObject.class);
 
 //    private static final String BASIC_TOPIC = "/iot/smartIrrigation/env-mon";
 
-    private static final String TELEMETRY_ENV_MON_TOPIC = "env-mon";
+    private static final String TELEMETRY_PEOP_COUNT_TOPIC = "peop-count";
 
-    private String envMonId;
+    private String peopCountId;
 
     private ObjectMapper mapper;
 
     private IMqttClient mqttClient;
 
-    private Map<String, EnvironmentalMonitoringSmartObjectResource> resourceMap;
+    private Map<String, PeopleCounterSmartObjectResource> resourceMap;
 
-    public EnvMonMQTTSmartObject() {
+    public PeopCountMQTTSmartObject() {
         this.mapper = new ObjectMapper();
     }
 
-    public void init(String envMonId, IMqttClient mqttClient, HashMap<String, EnvironmentalMonitoringSmartObjectResource> resourceMap){
+    public void init(String peopCountId, IMqttClient mqttClient, HashMap<String, PeopleCounterSmartObjectResource> resourceMap){
 
-        this.envMonId = envMonId;
+        this.peopCountId = peopCountId;
         this.mqttClient = mqttClient;
         this.resourceMap = resourceMap;
 
-        logger.info("Environmental Monitoring Smart Object correctly created ! Resource Number: {}", resourceMap.keySet().size());
+        logger.info("People Counter Object correctly created ! Resource Number: {}", resourceMap.keySet().size());
     }
 
     public void start(){
@@ -48,10 +48,10 @@ public class EnvMonMQTTSmartObject {
         try{
 
             if(this.mqttClient != null &&
-                    this.envMonId != null  && this.envMonId.length() > 0 &&
+                    this.peopCountId != null  && this.peopCountId.length() > 0 &&
                     this.resourceMap != null && resourceMap.keySet().size() > 0){
 
-                logger.info("Starting Environmental Monitoring Emulator ....");
+                logger.info("Starting People Counter Emulator ....");
 
 //                registerToControlChannel();
 
@@ -61,7 +61,7 @@ public class EnvMonMQTTSmartObject {
             }
 
         }catch (Exception e){
-            logger.error("Error Starting the Vehicle Emulator ! Msg: {}", e.getLocalizedMessage());
+            logger.error("Error Starting the People Counter Emulator ! Msg: {}", e.getLocalizedMessage());
         }
 
     }
@@ -71,21 +71,21 @@ public class EnvMonMQTTSmartObject {
             this.resourceMap.entrySet().forEach(resourceEntry -> {
 
                 if (resourceEntry.getKey() != null && resourceEntry.getValue() != null) {
-                    EnvironmentalMonitoringSmartObjectResource environmentalMonitoringSmartObjectResource = resourceEntry.getValue();
+                    PeopleCounterSmartObjectResource peopleCounterSmartObjectResource = resourceEntry.getValue();
 
                     logger.info("Registering to Resource {} (id: {}) notifications ...",
-                            environmentalMonitoringSmartObjectResource.getType(),
-                            environmentalMonitoringSmartObjectResource.getId());
+                            peopleCounterSmartObjectResource.getType(),
+                            peopleCounterSmartObjectResource.getId());
 
-                    if (environmentalMonitoringSmartObjectResource.getType().equals(BatteryEMSensorResource.RESOURCE_TYPE) || environmentalMonitoringSmartObjectResource.getType().equals(BrightnessSensorResource.RESOURCE_TYPE) || environmentalMonitoringSmartObjectResource.getType().equals(HumiditySensorResource.RESOURCE_TYPE) || environmentalMonitoringSmartObjectResource.getType().equals(RainSensorResource.RESOURCE_TYPE) || environmentalMonitoringSmartObjectResource.getType().equals(TemperatureSensorResource.RESOURCE_TYPE)){
-                        environmentalMonitoringSmartObjectResource.addDataListener(new ResourceDataListenerEM() {
+                    if (peopleCounterSmartObjectResource.getType().equals(PresenceSensorResource.RESOURCE_TYPE) || peopleCounterSmartObjectResource.getType().equals(BrightnessSensorResource.RESOURCE_TYPE) || peopleCounterSmartObjectResource.getType().equals(HumiditySensorResource.RESOURCE_TYPE) || peopleCounterSmartObjectResource.getType().equals(RainSensorResource.RESOURCE_TYPE) || peopleCounterSmartObjectResource.getType().equals(TemperatureSensorResource.RESOURCE_TYPE)){
+                        peopleCounterSmartObjectResource.addDataListenerPC(new ResourceDataListenerPC() {
                             @Override
-                            public void onDataChanged(EnvironmentalMonitoringSmartObjectResource resource, Object updatedValue) {
+                            public void onDataChanged(PeopleCounterSmartObjectResource resource, Object updatedValue) {
 
 
                                 try {
-                                    publishTelemetryData(String.format("%s/%s/%s/%s", MQTT_BASIC_TOPIC, envMonId, TELEMETRY_ENV_MON_TOPIC, resourceEntry.getKey()),
-                                            new TelemetryMessage(environmentalMonitoringSmartObjectResource.getType(), updatedValue));
+                                    publishTelemetryData(String.format("%s/%s/%s/%s", MQTT_BASIC_TOPIC, peopCountId, TELEMETRY_PEOP_COUNT_TOPIC, resourceEntry.getKey()),
+                                            new TelemetryMessage(peopleCounterSmartObjectResource.getType(), updatedValue));
                                 } catch (MqttException | JsonProcessingException e) {
                                     e.printStackTrace();
                                 }

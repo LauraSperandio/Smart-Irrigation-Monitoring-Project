@@ -26,13 +26,13 @@ public class IrrigationSensorActuatorResource extends IrrigationControllerSmartO
 
     private Timer updateTimer = null;
 
-    private String accens;
+    private Boolean accensione = false;
 
-    private String policy;
+    private String policyConfiguration = "Day";
 
-    private String livelloIrr;
+    private String livelloIrrigazione = "LOW";
 
-    private String tipologiaIrr;
+    private Boolean tipologiaIrrigazioneRotazione = false;
 
     public IrrigationSensorActuatorResource() {
         super(UUID.randomUUID().toString(), IrrigationSensorActuatorResource.RESOURCE_TYPE);
@@ -46,19 +46,20 @@ public class IrrigationSensorActuatorResource extends IrrigationControllerSmartO
 
     private void init() {
         try {
-            accens = "OFF";
-            policy = "Week Day";
-            livelloIrr = "Medium";
-            tipologiaIrr = "Rotation ON";
 
-            updatedIrrigationControllerDescriptor.setPolicyConfiguration(accens);
+/*            accensione = true;
+            policyConfiguration = "Week Day";
+            livelloIrrigazione = "Medium";
+            tipologiaIrrigazioneRotazione = "Rotation ON";
 
-            updatedIrrigationControllerDescriptor.setPolicyConfiguration(policy);
+            updatedIrrigationControllerDescriptor.setPolicyConfiguration(accensione);
 
-            updatedIrrigationControllerDescriptor.setLivelloIrrigazione(livelloIrr);
+            updatedIrrigationControllerDescriptor.setPolicyConfiguration(policyConfiguration);
 
-            updatedIrrigationControllerDescriptor.setTipologiaIrrigazione(tipologiaIrr);
+            updatedIrrigationControllerDescriptor.setLivelloIrrigazione(livelloIrrigazione);
 
+            updatedIrrigationControllerDescriptor.setTipologiaIrrigazione(tipologiaIrrigazioneRotazione);
+*/
             logger.info("Configuration automatic policy correctly loaded !");
 
             startPeriodicEventValueUpdateTask();
@@ -77,14 +78,14 @@ public class IrrigationSensorActuatorResource extends IrrigationControllerSmartO
             this.updateTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    accens = "OFF";
-                    policy = "Week Day";
-                    livelloIrr = "Medium";
-                    tipologiaIrr = "Rotation ON";
-                    updatedIrrigationControllerDescriptor.setAccensione(accens);
-                    updatedIrrigationControllerDescriptor.setPolicyConfiguration(policy);
-                    updatedIrrigationControllerDescriptor.setLivelloIrrigazione(livelloIrr);
-                    updatedIrrigationControllerDescriptor.setTipologiaIrrigazione(tipologiaIrr);
+                    accensione = false;
+                    policyConfiguration = "Week Day";
+                    livelloIrrigazione = "Medium";
+                    tipologiaIrrigazioneRotazione = false;
+                    updatedIrrigationControllerDescriptor.setAccensione(accensione);
+                    updatedIrrigationControllerDescriptor.setPolicyConfiguration(policyConfiguration);
+                    updatedIrrigationControllerDescriptor.setLivelloIrrigazione(livelloIrrigazione);
+                    updatedIrrigationControllerDescriptor.setTipologiaIrrigazione(tipologiaIrrigazioneRotazione);
 
                     notifyUpdateIC(updatedIrrigationControllerDescriptor);
                 }

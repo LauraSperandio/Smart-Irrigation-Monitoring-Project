@@ -15,32 +15,32 @@ import java.util.Map;
 
 import static it.unimore.fum.iot.smartIrrigation.process.MQTTConfigurationParameters.MQTT_BASIC_TOPIC;
 
-public class EnvMonMQTTSmartObject {
-    private static final Logger logger = LoggerFactory.getLogger(EnvMonMQTTSmartObject.class);
+public class IrrConMQTTSmartObject {
+    private static final Logger logger = LoggerFactory.getLogger(IrrConMQTTSmartObject.class);
 
 //    private static final String BASIC_TOPIC = "/iot/smartIrrigation/env-mon";
 
-    private static final String TELEMETRY_ENV_MON_TOPIC = "env-mon";
+    private static final String TELEMETRY_IRR_CON_TOPIC = "irr-con";
 
-    private String envMonId;
+    private String IrrConID;
 
     private ObjectMapper mapper;
 
     private IMqttClient mqttClient;
 
-    private Map<String, EnvironmentalMonitoringSmartObjectResource> resourceMap;
+    private Map<String, IrrigationControllerSmartObjectResource> resourceMap;
 
-    public EnvMonMQTTSmartObject() {
+    public IrrConMQTTSmartObject() {
         this.mapper = new ObjectMapper();
     }
 
-    public void init(String envMonId, IMqttClient mqttClient, HashMap<String, EnvironmentalMonitoringSmartObjectResource> resourceMap){
+    public void init(String IrrConID, IMqttClient mqttClient, HashMap<String, IrrigationControllerSmartObjectResource> resourceMap){
 
-        this.envMonId = envMonId;
+        this.IrrConID = IrrConID;
         this.mqttClient = mqttClient;
         this.resourceMap = resourceMap;
 
-        logger.info("Environmental Monitoring Smart Object correctly created ! Resource Number: {}", resourceMap.keySet().size());
+        logger.info("Irrigation Controller Smart Object correctly created ! Resource Number: {}", resourceMap.keySet().size());
     }
 
     public void start(){
@@ -48,10 +48,10 @@ public class EnvMonMQTTSmartObject {
         try{
 
             if(this.mqttClient != null &&
-                    this.envMonId != null  && this.envMonId.length() > 0 &&
+                    this.IrrConID != null  && this.IrrConID.length() > 0 &&
                     this.resourceMap != null && resourceMap.keySet().size() > 0){
 
-                logger.info("Starting Environmental Monitoring Emulator ....");
+                logger.info("Starting Irrigation Controller Emulator ....");
 
 //                registerToControlChannel();
 
@@ -61,7 +61,7 @@ public class EnvMonMQTTSmartObject {
             }
 
         }catch (Exception e){
-            logger.error("Error Starting the Vehicle Emulator ! Msg: {}", e.getLocalizedMessage());
+            logger.error("Error Starting the Irrigation Controller Emulator ! Msg: {}", e.getLocalizedMessage());
         }
 
     }
@@ -71,21 +71,21 @@ public class EnvMonMQTTSmartObject {
             this.resourceMap.entrySet().forEach(resourceEntry -> {
 
                 if (resourceEntry.getKey() != null && resourceEntry.getValue() != null) {
-                    EnvironmentalMonitoringSmartObjectResource environmentalMonitoringSmartObjectResource = resourceEntry.getValue();
+                    IrrigationControllerSmartObjectResource irrigationControllerSmartObjectResource = resourceEntry.getValue();
 
                     logger.info("Registering to Resource {} (id: {}) notifications ...",
-                            environmentalMonitoringSmartObjectResource.getType(),
-                            environmentalMonitoringSmartObjectResource.getId());
+                            irrigationControllerSmartObjectResource.getType(),
+                            irrigationControllerSmartObjectResource.getId());
 
-                    if (environmentalMonitoringSmartObjectResource.getType().equals(BatteryEMSensorResource.RESOURCE_TYPE) || environmentalMonitoringSmartObjectResource.getType().equals(BrightnessSensorResource.RESOURCE_TYPE) || environmentalMonitoringSmartObjectResource.getType().equals(HumiditySensorResource.RESOURCE_TYPE) || environmentalMonitoringSmartObjectResource.getType().equals(RainSensorResource.RESOURCE_TYPE) || environmentalMonitoringSmartObjectResource.getType().equals(TemperatureSensorResource.RESOURCE_TYPE)){
-                        environmentalMonitoringSmartObjectResource.addDataListener(new ResourceDataListenerEM() {
+                    if (irrigationControllerSmartObjectResource.getType().equals(IrrigationSensorActuatorResource.RESOURCE_TYPE)){
+                        irrigationControllerSmartObjectResource.addDataListenerIC(new ResourceDataListenerIC() {
                             @Override
-                            public void onDataChanged(EnvironmentalMonitoringSmartObjectResource resource, Object updatedValue) {
+                            public void onDataChanged(IrrigationControllerSmartObjectResource resource, Object updatedValue) {
 
 
                                 try {
-                                    publishTelemetryData(String.format("%s/%s/%s/%s", MQTT_BASIC_TOPIC, envMonId, TELEMETRY_ENV_MON_TOPIC, resourceEntry.getKey()),
-                                            new TelemetryMessage(environmentalMonitoringSmartObjectResource.getType(), updatedValue));
+                                    publishTelemetryData(String.format("%s/%s/%s/%s", MQTT_BASIC_TOPIC, IrrConID, TELEMETRY_IRR_CON_TOPIC, resourceEntry.getKey()),
+                                            new TelemetryMessage(irrigationControllerSmartObjectResource.getType(), updatedValue));
                                 } catch (MqttException | JsonProcessingException e) {
                                     e.printStackTrace();
                                 }
