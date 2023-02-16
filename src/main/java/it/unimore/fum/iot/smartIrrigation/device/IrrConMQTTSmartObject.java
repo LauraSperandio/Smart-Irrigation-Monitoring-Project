@@ -58,6 +58,8 @@ public class IrrConMQTTSmartObject {
 
                 registerToAvailableResources();
 
+                registerToControlChannel();
+
 
             }
 
@@ -66,6 +68,11 @@ public class IrrConMQTTSmartObject {
         }
 
     }
+
+    private void registerToControlChannel() {
+        //TODO
+    }
+
     private void registerToAvailableResources(){
         try{
 
@@ -105,24 +112,34 @@ public class IrrConMQTTSmartObject {
 
     private void publishTelemetryData(String topic, TelemetryMessage telemetryMessage) throws MqttException, JsonProcessingException {
 
-        logger.info("Sending to topic: {} -> Data: {}", topic, telemetryMessage);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
 
-        if(this.mqttClient != null && this.mqttClient.isConnected() && telemetryMessage != null && topic != null){
+                try {
+                    logger.info("Sending to topic: {} -> Data: {}", topic, telemetryMessage);
 
-            String messagePayload = mapper.writeValueAsString(telemetryMessage);
+                    if(mqttClient != null && mqttClient.isConnected() && telemetryMessage != null && topic != null){
 
-            MqttMessage mqttMessage = new MqttMessage(messagePayload.getBytes());
-            mqttMessage.setQos(0);
+                        String messagePayload = mapper.writeValueAsString(telemetryMessage);
 
-            mqttClient.publish(topic, mqttMessage);
+                        MqttMessage mqttMessage = new MqttMessage(messagePayload.getBytes());
+                        mqttMessage.setQos(0);
 
-            logger.info("Data Correctly Published to topic: {}", topic);
+                        mqttClient.publish(topic, mqttMessage);
 
-        }
-        else
-            logger.error("Error: Topic or Msg = Null or MQTT Client is not Connected !");
+                        logger.info("Data Correctly Published to topic: {}", topic);
+
+                    }
+                    else
+                        logger.error("Error: Topic or Msg = Null or MQTT Client is not Connected !");
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+
+            }
+        });
 
     }
-
 
 }

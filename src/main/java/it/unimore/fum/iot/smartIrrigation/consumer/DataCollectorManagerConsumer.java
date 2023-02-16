@@ -1,5 +1,6 @@
 package it.unimore.fum.iot.smartIrrigation.consumer;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,6 +15,7 @@ import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.json.*;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -279,7 +281,12 @@ public class DataCollectorManagerConsumer {
                 return Optional.empty();
 
             byte[] payloadByteArray = mqttMessage.getPayload();
-            String payloadString = new String(payloadByteArray);
+            JSONObject obj = new JSONObject(jsonString);
+            String in = obj.getString("in");
+
+//            String payloadString = new String(payloadByteArray);
+
+
 
             return Optional.of(mapper.readValue(payloadString, new TypeReference<TelemetryMessage<Double>>() {}));
 
