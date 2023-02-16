@@ -167,15 +167,15 @@ public class DataCollectorManagerConsumer {
                 //messaged from multiple and different topic can be received with the same subscription
                 //The msg variable is a MqttMessage object containing all the information about the received message
 
-                Optional<TelemetryMessage<Boolean>> telemetryMessageOptional = parseTelemetryMessagePayload(msg);
+                Optional<TelemetryMessage<Boolean>> telemetryMessageOptional = parseTelemetryMessagePayloadBool(msg);
 
                 if(telemetryMessageOptional.isPresent() && telemetryMessageOptional.get().getType().equals(RainSensorResource.RESOURCE_TYPE)){
 
                     Boolean newRainData = telemetryMessageOptional.get().getDataValue();
                     logger.info("New Rain Telemetry Data Received ! it's raining: {}", newRainData);
 
-/*                    if(newRainData && !isAlarmNotifiedIRR){
-                        logger.info("LOW TEMPERATURE DETECTED ! Sending Control Notification ...");
+                    if(newRainData && !isAlarmNotifiedIRR){
+                        logger.info("IT'S RAINING ! Sending Control Notification ...");
                         isAlarmNotifiedIRR = true;
 
 
@@ -187,7 +187,37 @@ public class DataCollectorManagerConsumer {
                                 put("tipologiaIrrigazioneRotazione", false);
                             }
                         }));
-                    }   */
+                    }
+                }
+            });
+
+            // subscribe to topic for person presence  and publish the stop to irrigation if there are person
+            client.subscribe(MQTTConfigurationParameters.TARGET_PRESENCE_TOPIC, (topic, msg) -> {
+                //The topic variable contain the specific topic associated to the received message. Using MQTT wildcards
+                //messaged from multiple and different topic can be received with the same subscription
+                //The msg variable is a MqttMessage object containing all the information about the received message
+
+                Optional<TelemetryMessage<Double>> telemetryMessageOptional = parseTelemetryMessagePayload(msg);
+
+                if(telemetryMessageOptional.isPresent() && telemetryMessageOptional.get().getType().equals(RainSensorResource.RESOURCE_TYPE)){
+
+                    Double newPresenceData = telemetryMessageOptional.get().getDataValue();
+                    logger.info("New Rain Telemetry Data Received ! it's raining: {}", newPresenceData);
+
+/*                    if(newRainData && !isAlarmNotifiedIRR){
+                        logger.info("IT'S RAINING ! Sending Control Notification ...");
+                        isAlarmNotifiedIRR = true;
+
+
+                        publishIrrigationControlMessage(client, MQTTConfigurationParameters.CHANGE_IRRIGATION_TOPIC, new ControlMessage(ALARM_MESSAGE_STOP_IRRIGATION_TYPE, new HashMap(){
+                            {
+                                put("accensione", false);
+                                put("policyConfiguration", "Day");
+                                put("livelloIrrigazione", "LOW");
+                                put("tipologiaIrrigazioneRotazione", false);
+                            }
+                        }));
+                    } */
                 }
             });
 
@@ -206,6 +236,42 @@ public class DataCollectorManagerConsumer {
     }
 
     private static Optional<TelemetryMessage<Double>> parseTelemetryMessagePayload(MqttMessage mqttMessage){
+
+        try{
+
+            if(mqttMessage == null)
+                return Optional.empty();
+
+            byte[] payloadByteArray = mqttMessage.getPayload();
+            String payloadString = new String(payloadByteArray);
+
+            return Optional.of(mapper.readValue(payloadString, new TypeReference<TelemetryMessage<Double>>() {}));
+
+
+        }catch (Exception e){
+            return Optional.empty();
+        }
+    }
+
+    private static Optional<TelemetryMessage<Boolean>> parseTelemetryMessagePayloadBool(MqttMessage mqttMessage){
+
+        try{
+
+            if(mqttMessage == null)
+                return Optional.empty();
+
+            byte[] payloadByteArray = mqttMessage.getPayload();
+            String payloadString = new String(payloadByteArray);
+
+            return Optional.of(mapper.readValue(payloadString, new TypeReference<TelemetryMessage<Boolean>>() {}));
+
+
+        }catch (Exception e){
+            return Optional.empty();
+        }
+    }
+
+    private static Optional<TelemetryMessage<Double>> parseTelemetryMessagePayloadPres(MqttMessage mqttMessage){
 
         try{
 
