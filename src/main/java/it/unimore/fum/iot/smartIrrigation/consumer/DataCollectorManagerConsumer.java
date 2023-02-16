@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import it.unimore.fum.iot.smartIrrigation.device.PeopCountMQTTSmartObject;
 import it.unimore.fum.iot.smartIrrigation.message.ControlMessage;
 import it.unimore.fum.iot.smartIrrigation.message.TelemetryMessage;
 import it.unimore.fum.iot.smartIrrigation.resource.BatteryEMSensorResource;
@@ -15,7 +16,7 @@ import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.json.*;
+//import org.json.*;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -193,12 +194,23 @@ public class DataCollectorManagerConsumer {
                 }
             });
 
+
+
+
+
+
+
             // subscribe to topic for person presence  and publish the stop to irrigation if there are person
             client.subscribe(MQTTConfigurationParameters.TARGET_PRESENCE_TOPIC, (topic, msg) -> {
                 //The topic variable contain the specific topic associated to the received message. Using MQTT wildcards
                 //messaged from multiple and different topic can be received with the same subscription
                 //The msg variable is a MqttMessage object containing all the information about the received message
 
+//                try{
+//                    mapper.readValue(messagePayload, PeopCountMQTTSmartObject.class);
+//                }catch (Exception e){
+
+//                }
                 Optional<TelemetryMessage<Double>> telemetryMessageOptional = parseTelemetryMessagePayload(msg);
 
                 if(telemetryMessageOptional.isPresent() && telemetryMessageOptional.get().getType().equals(RainSensorResource.RESOURCE_TYPE)){
@@ -281,10 +293,12 @@ public class DataCollectorManagerConsumer {
                 return Optional.empty();
 
             byte[] payloadByteArray = mqttMessage.getPayload();
-            JSONObject obj = new JSONObject(jsonString);
-            String in = obj.getString("in");
+            String payloadString = new String(payloadByteArray);
+//            JSONObject obj = new JSONObject(jsonString);
+//            String in = obj.getString("in");
 
-//            String payloadString = new String(payloadByteArray);
+//            mapper.readValue(messagePayload, PeopCountMQTTSmartObject.class);
+
 
 
 
