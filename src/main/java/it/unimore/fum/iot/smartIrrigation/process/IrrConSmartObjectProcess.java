@@ -2,7 +2,6 @@ package it.unimore.fum.iot.smartIrrigation.process;
 
 
 import it.unimore.fum.iot.smartIrrigation.device.IrrConMQTTSmartObject;
-import it.unimore.fum.iot.smartIrrigation.resource.BatteryEMSensorResource;
 import it.unimore.fum.iot.smartIrrigation.resource.BatteryICSensorResource;
 import it.unimore.fum.iot.smartIrrigation.resource.IrrigationControllerSmartObjectResource;
 import it.unimore.fum.iot.smartIrrigation.resource.IrrigationSensorActuatorResource;
@@ -47,6 +46,7 @@ public class IrrConSmartObjectProcess {
             options.setAutomaticReconnect(true);
             options.setCleanSession(true);
             options.setConnectionTimeout(10);
+
 
             options.setUserName(MQTTConfigurationParameters.MQTT_USERNAME);
             options.setPassword((MQTTConfigurationParameters.MQTT_PASSWORD).toCharArray());

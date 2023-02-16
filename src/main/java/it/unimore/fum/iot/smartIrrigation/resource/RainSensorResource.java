@@ -13,7 +13,7 @@ public class RainSensorResource extends EnvironmentalMonitoringSmartObjectResour
 
     private static final Logger logger = LoggerFactory.getLogger(RainSensorResource.class);
 
-    private static final long UPDATE_PERIOD = 60000; //1 minutes
+    private static final long UPDATE_PERIOD = 5000; //1 minutes
 
     private static final long TASK_DELAY_TIME = 5000; //Seconds before starting the periodic update task
 

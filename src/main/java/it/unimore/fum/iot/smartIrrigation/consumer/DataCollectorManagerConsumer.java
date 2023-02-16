@@ -1,10 +1,14 @@
 package it.unimore.fum.iot.smartIrrigation.consumer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import it.unimore.fum.iot.smartIrrigation.message.ControlMessage;
 import it.unimore.fum.iot.smartIrrigation.message.TelemetryMessage;
 import it.unimore.fum.iot.smartIrrigation.resource.BatteryEMSensorResource;
 import it.unimore.fum.iot.smartIrrigation.resource.BatteryICSensorResource;
+import it.unimore.fum.iot.smartIrrigation.resource.RainSensorResource;
+import it.unimore.fum.iot.smartIrrigation.resource.TemperatureSensorResource;
 import it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
@@ -21,9 +25,15 @@ public class DataCollectorManagerConsumer {
 
     private static final double ALARM_BATTERY_LEVEL = 20.0;
 
+    private static final double MINIMUM_TEMPERATURE_LEVEL = 20.0;
+
     private static boolean isAlarmNotifiedEM = false;
 
     private static boolean isAlarmNotifiedIC = false;
+
+    private static boolean isAlarmNotifiedIRR = false;
+
+    private static final String ALARM_MESSAGE_STOP_IRRIGATION_TYPE = "stop_irrigation_message";
 
     private static ObjectMapper mapper;
 
@@ -74,8 +84,7 @@ public class DataCollectorManagerConsumer {
 
             mapper = new ObjectMapper();
 
-            //Subscribe to the target topic #. In that case the consumer will receive (if authorized) all the message
-            //passing through the broker
+            // subscribe to topic for EM battery level and log if battery is under 20%
             client.subscribe(MQTTConfigurationParameters.TARGET_BATTERY_EM_TOPIC, (topic, msg) -> {
                 //The topic variable contain the specific topic associated to the received message. Using MQTT wildcards
                 //messaged from multiple and different topic can be received with the same subscription
@@ -83,7 +92,7 @@ public class DataCollectorManagerConsumer {
 
                 Optional<TelemetryMessage<Double>> telemetryMessageOptional = parseTelemetryMessagePayload(msg);
 
-                if(telemetryMessageOptional.isPresent() && telemetryMessageOptional.get().getType().equals(BatteryEMSensorResource.RESOURCE_TYPE) || telemetryMessageOptional.get().getType().equals(BatteryICSensorResource.RESOURCE_TYPE)){
+                if(telemetryMessageOptional.isPresent() && telemetryMessageOptional.get().getType().equals(BatteryEMSensorResource.RESOURCE_TYPE)){
 
                     Double newBatteryLevel = telemetryMessageOptional.get().getDataValue();
                     logger.info("New Battery Telemetry Data Received ! Battery EM Level: {}", newBatteryLevel);
@@ -97,6 +106,8 @@ public class DataCollectorManagerConsumer {
                 }
             });
 
+
+            // subscribe to topic for IC battery level and log if battery is under 20%
             client.subscribe(MQTTConfigurationParameters.TARGET_BATTERY_IC_TOPIC, (topic, msg) -> {
                 //The topic variable contain the specific topic associated to the received message. Using MQTT wildcards
                 //messaged from multiple and different topic can be received with the same subscription
@@ -104,7 +115,7 @@ public class DataCollectorManagerConsumer {
 
                 Optional<TelemetryMessage<Double>> telemetryMessageOptional = parseTelemetryMessagePayload(msg);
 
-                if(telemetryMessageOptional.isPresent() && telemetryMessageOptional.get().getType().equals(BatteryEMSensorResource.RESOURCE_TYPE) || telemetryMessageOptional.get().getType().equals(BatteryICSensorResource.RESOURCE_TYPE)){
+                if(telemetryMessageOptional.isPresent() && telemetryMessageOptional.get().getType().equals(BatteryICSensorResource.RESOURCE_TYPE)){
 
                     Double newBatteryLevel = telemetryMessageOptional.get().getDataValue();
                     logger.info("New Battery Telemetry Data Received ! Battery IC Level: {}", newBatteryLevel);
@@ -119,6 +130,67 @@ public class DataCollectorManagerConsumer {
                 }
             });
 
+
+            // subscribe to topic for temperature level and publish the stop to irrigation if temperature is under 20°C
+            client.subscribe(MQTTConfigurationParameters.TARGET_TEMPERATURE_TOPIC, (topic, msg) -> {
+                //The topic variable contain the specific topic associated to the received message. Using MQTT wildcards
+                //messaged from multiple and different topic can be received with the same subscription
+                //The msg variable is a MqttMessage object containing all the information about the received message
+
+                Optional<TelemetryMessage<Double>> telemetryMessageOptional = parseTelemetryMessagePayload(msg);
+
+                if(telemetryMessageOptional.isPresent() && telemetryMessageOptional.get().getType().equals(TemperatureSensorResource.RESOURCE_TYPE)){
+
+                    Double newTemperature = telemetryMessageOptional.get().getDataValue();
+                    logger.info("New Temperature Telemetry Data Received ! Temperature: {}", newTemperature);
+
+                    if(isLowTemperature(newTemperature) && !isAlarmNotifiedIRR){
+                        logger.info("LOW TEMPERATURE DETECTED ! Sending Control Notification ...");
+                        isAlarmNotifiedIRR = true;
+
+
+                        publishIrrigationControlMessage(client, MQTTConfigurationParameters.CHANGE_IRRIGATION_TOPIC, new ControlMessage(ALARM_MESSAGE_STOP_IRRIGATION_TYPE, new HashMap(){
+                            {
+                                put("accensione", false);
+                                put("policyConfiguration", "Day");
+                                put("livelloIrrigazione", "LOW");
+                                put("tipologiaIrrigazioneRotazione", false);
+                            }
+                        }));
+                    }
+                }
+            });
+
+            // subscribe to topic for rain and publish the stop to irrigation if it's raining
+            client.subscribe(MQTTConfigurationParameters.TARGET_RAIN_TOPIC, (topic, msg) -> {
+                //The topic variable contain the specific topic associated to the received message. Using MQTT wildcards
+                //messaged from multiple and different topic can be received with the same subscription
+                //The msg variable is a MqttMessage object containing all the information about the received message
+
+                Optional<TelemetryMessage<Boolean>> telemetryMessageOptional = parseTelemetryMessagePayload(msg);
+
+                if(telemetryMessageOptional.isPresent() && telemetryMessageOptional.get().getType().equals(RainSensorResource.RESOURCE_TYPE)){
+
+                    Boolean newRainData = telemetryMessageOptional.get().getDataValue();
+                    logger.info("New Rain Telemetry Data Received ! it's raining: {}", newRainData);
+
+/*                    if(newRainData && !isAlarmNotifiedIRR){
+                        logger.info("LOW TEMPERATURE DETECTED ! Sending Control Notification ...");
+                        isAlarmNotifiedIRR = true;
+
+
+                        publishIrrigationControlMessage(client, MQTTConfigurationParameters.CHANGE_IRRIGATION_TOPIC, new ControlMessage(ALARM_MESSAGE_STOP_IRRIGATION_TYPE, new HashMap(){
+                            {
+                                put("accensione", false);
+                                put("policyConfiguration", "Day");
+                                put("livelloIrrigazione", "LOW");
+                                put("tipologiaIrrigazioneRotazione", false);
+                            }
+                        }));
+                    }   */
+                }
+            });
+
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -127,6 +199,10 @@ public class DataCollectorManagerConsumer {
 
     private static boolean isBatteryLevelAlarm(Double newValue){
         return newValue <= ALARM_BATTERY_LEVEL;
+    }
+
+    private static boolean isLowTemperature(Double newValue){
+        return newValue <= MINIMUM_TEMPERATURE_LEVEL;
     }
 
     private static Optional<TelemetryMessage<Double>> parseTelemetryMessagePayload(MqttMessage mqttMessage){
@@ -145,6 +221,27 @@ public class DataCollectorManagerConsumer {
         }catch (Exception e){
             return Optional.empty();
         }
+    }
+
+    private static void publishIrrigationControlMessage(IMqttClient mqttClient, String topic, ControlMessage controlMessage) throws MqttException, JsonProcessingException {
+
+        logger.info("Sending to topic: {} -> Data: {}", topic, controlMessage);
+
+        if(mqttClient != null && mqttClient.isConnected() && controlMessage != null && topic != null){
+
+            String messagePayload = mapper.writeValueAsString(controlMessage);
+
+            MqttMessage mqttMessage = new MqttMessage(messagePayload.getBytes());
+            mqttMessage.setQos(1);
+
+            mqttClient.publish(topic, mqttMessage);
+
+            logger.info("Data Correctly Published to topic: {}", topic);
+
+        }
+        else
+            logger.error("Error: Topic or Msg = Null or MQTT Client is not Connected !");
+
     }
 
 }
