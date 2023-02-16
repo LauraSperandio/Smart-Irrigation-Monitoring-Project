@@ -11,4 +11,12 @@ public class MQTTConfigurationParameters {
     public static final String TELEMETRY_ENV_MON_TOPIC = "env-mon";
     public static final String TELEMETRY_IRR_CON_TOPIC = "irr-con";
     public static final String TELEMETRY_PEOP_COUNT_TOPIC = "peop-count";
+
+    public static final String TARGET_BATTERY_EM_TOPIC = "/iot/user/262716@studenti.unimore.it/+/env-mon/battery";
+    public static final String TARGET_BATTERY_IC_TOPIC = "/iot/user/262716@studenti.unimore.it/+/irr-con/battery";
+    public static final String TARGET_TEMPERATURE_TOPIC = "/iot/user/262716@studenti.unimore.it/+/env-mon/temperature";
+    public static final String TARGET_RAIN_TOPIC = "/iot/user/262716@studenti.unimore.it/+/env-mon/rain";
+
+
+
 }

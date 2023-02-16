@@ -78,7 +78,7 @@ public class IrrConMQTTSmartObject {
                             irrigationControllerSmartObjectResource.getType(),
                             irrigationControllerSmartObjectResource.getId());
 
-                    if (irrigationControllerSmartObjectResource.getType().equals(IrrigationSensorActuatorResource.RESOURCE_TYPE)){
+                    if (irrigationControllerSmartObjectResource.getType().equals(IrrigationSensorActuatorResource.RESOURCE_TYPE) || irrigationControllerSmartObjectResource.getType().equals(BatteryICSensorResource.RESOURCE_TYPE)){
                         irrigationControllerSmartObjectResource.addDataListenerIC(new ResourceDataListenerIC() {
                             @Override
                             public void onDataChanged(IrrigationControllerSmartObjectResource resource, Object updatedValue) {

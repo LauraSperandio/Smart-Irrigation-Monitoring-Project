@@ -54,6 +54,7 @@ public class EnvMonSmartObjectProcess {
                     put("brightness", new BrightnessSensorResource());
                     put("humidity", new HumiditySensorResource());
                     put("temperature", new TemperatureSensorResource());
+                    put("rain", new RainSensorResource());
                 }
             });
             envMonMQTTSmartObject.start();

@@ -1,6 +1,7 @@
 package it.unimore.fum.iot.smartIrrigation.consumer;
 
 
+import it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters;
 import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
@@ -16,12 +17,12 @@ public class SimpleTestConsumer {
     private final static Logger logger = LoggerFactory.getLogger(SimpleTestConsumer.class);
 
     //IP Address of the target MQTT Broker
-    private static String BROKER_ADDRESS = "155.185.228.20";
+//    private static String BROKER_ADDRESS = "155.185.228.20";
 
     //PORT of the target MQTT Broker
-    private static int BROKER_PORT = 7883;
+//    private static int BROKER_PORT = 7883;
 
-    private static final String TARGET_TOPIC = "#";
+    private static final String TARGET_TOPIC = "/iot/user/262716@studenti.unimore.it/#";
 
     public static void main(String [ ] args) {
 
@@ -40,7 +41,7 @@ public class SimpleTestConsumer {
             //The the persistence is not passed to the constructor the default file persistence is used.
             //In case of a file-based storage the same MQTT client UUID should be used
             IMqttClient client = new MqttClient(
-                    String.format("tcp://%s:%d", BROKER_ADDRESS, BROKER_PORT), //Create the URL from IP and PORT
+                    String.format("tcp://%s:%d", MQTTConfigurationParameters.BROKER_ADDRESS, MQTTConfigurationParameters.BROKER_PORT), //Create the URL from IP and PORT
                     clientId,
                     persistence);
 
@@ -50,6 +51,9 @@ public class SimpleTestConsumer {
             options.setAutomaticReconnect(true);
             options.setCleanSession(true);
             options.setConnectionTimeout(10);
+
+            options.setUserName(MQTTConfigurationParameters.MQTT_USERNAME);
+            options.setPassword((MQTTConfigurationParameters.MQTT_PASSWORD).toCharArray());
 
             //Connect to the target broker
             client.connect(options);
