@@ -2,9 +2,6 @@ package it.unimore.fum.iot.smartIrrigation.model;
 
 public class IrrigationControllerDescriptor {
 
-/*    public static final String CAMERA_PROVIDER = "camera_provider";
-
-    public static final String RANDOM_PROVIDER = "random_provider";*/
 
     private Boolean accensione;
 
@@ -14,7 +11,6 @@ public class IrrigationControllerDescriptor {
 
     private Boolean tipologiaIrrigazione;
 
-//    private String provider;
 
     public IrrigationControllerDescriptor() {
     }
@@ -58,15 +54,6 @@ public class IrrigationControllerDescriptor {
         this.tipologiaIrrigazione = tipologiaIrrigazione;
     }
 
-    /**
-     public String getProvider() {
-     return provider;
-     }
-
-     public void setProvider(String provider) {
-     this.provider = provider;
-     }
-     */
 
     @Override
     public String toString() {
@@ -75,7 +62,6 @@ public class IrrigationControllerDescriptor {
         sb.append(", policyConfiguration=").append(policyConfiguration);
         sb.append(", livelloIrrigazione=").append(livelloIrrigazione);
         sb.append(", tipologiaIrrigazione=").append(tipologiaIrrigazione);
-//        sb.append(", provider='").append(provider).append('\'');
         sb.append('}');
         return sb.toString();
     }

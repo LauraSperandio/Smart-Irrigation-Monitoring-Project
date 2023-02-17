@@ -3,14 +3,10 @@ package it.unimore.fum.iot.smartIrrigation.device;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.unimore.fum.iot.smartIrrigation.message.ControlMessage;
 import it.unimore.fum.iot.smartIrrigation.message.TelemetryMessage;
 import it.unimore.fum.iot.smartIrrigation.resource.*;
 import it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters;
-import org.eclipse.paho.client.mqttv3.IMqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +20,6 @@ import static it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParamete
 public class IrrConMQTTSmartObject {
     private static final Logger logger = LoggerFactory.getLogger(IrrConMQTTSmartObject.class);
 
-//    private static final String BASIC_TOPIC = "/iot/smartIrrigation/env-mon";
-
-//    private static final String TELEMETRY_IRR_CON_TOPIC = "irr-con";
 
     private String IrrConID;
 
@@ -76,48 +69,28 @@ public class IrrConMQTTSmartObject {
 
     }
 
-    private void registerToControlChannel() throws MqttException {
-
-        MqttConnectOptions options = new MqttConnectOptions();
-        options.setAutomaticReconnect(true);
-        options.setCleanSession(true);
-        options.setConnectionTimeout(10);
-
-        options.setUserName(MQTTConfigurationParameters.MQTT_USERNAME);
-        options.setPassword((MQTTConfigurationParameters.MQTT_PASSWORD).toCharArray());
+    private void registerToControlChannel() {
 
         try{
-            //Connect to the target broker
-            this.mqttClient.connect(options);
 
-            logger.info("Connected ! Client Id: {}", this.mqttClient);
-            // subscribe to topic for rain and publish the stop to irrigation if it's raining
-            this.mqttClient.subscribe(MQTTConfigurationParameters.TARGET_CHANGE_IRRIGATION_TOPIC, (topic, msg) -> {
-                //The topic variable contain the specific topic associated to the received message. Using MQTT wildcards
-                //messaged from multiple and different topic can be received with the same subscription
-                //The msg variable is a MqttMessage object containing all the information about the received message
+//            String deviceControlTopic = String.format("%s/%s/%s", BASIC_TOPIC, vehicleId, CONTROL_TOPIC);
 
-                Optional<TelemetryMessage<Boolean>> telemetryMessageOptional = parseTelemetryMessagePayloadBool(msg);
+            logger.info("Registering to Control Topic ({}) ... ", MQTTConfigurationParameters.TARGET_CHANGE_IRRIGATION_TOPIC);
 
-                if(telemetryMessageOptional.isPresent() && telemetryMessageOptional.get().getType().equals(PresenceSensorResource.RESOURCE_TYPE)){
+            this.mqttClient.subscribe(MQTTConfigurationParameters.TARGET_CHANGE_IRRIGATION_TOPIC, new IMqttMessageListener() {
+                @Override
+                public void messageArrived(String topic, MqttMessage message) throws Exception {
 
-                    Boolean newStopIrr = telemetryMessageOptional.get().getDataValue();
-                    logger.info("New Rain Telemetry Data Received ! it's raining: {}", newStopIrr);
-
-                    if(newStopIrr && !isStoppedIRR){
-                        logger.info("IT'S RAINING ! Sending Control Notification ...");
-                        isStoppedIRR = true;
-    //                    accensione = false;
-
-    //                    updatedIrrigationControllerDescriptor.setAccensione(accensione);
-
-                    }
+                    if(message != null)
+                        logger.info("[CONTROL CHANNEL] -> Control Message Received -> {}", new String(message.getPayload()));
+                    else
+                        logger.error("[CONTROL CHANNEL] -> Null control message received !");
                 }
             });
-        }catch(Exception e){
-            e.printStackTrace();
-        }
 
+        }catch (Exception e){
+            logger.error("ERROR Registering to Control Channel ! Msg: {}", e.getLocalizedMessage());
+        }
     }
 
     private void registerToAvailableResources(){

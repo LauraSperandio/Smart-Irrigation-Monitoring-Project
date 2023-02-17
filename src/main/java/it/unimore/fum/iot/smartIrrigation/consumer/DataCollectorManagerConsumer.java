@@ -282,22 +282,33 @@ public class DataCollectorManagerConsumer {
 
     private static void publishIrrigationControlMessage(IMqttClient mqttClient, String topic, ControlMessage controlMessage) throws MqttException, JsonProcessingException {
 
-        logger.info("Sending to topic: {} -> Data: {}", topic, controlMessage);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    logger.info("Sending to topic: {} -> Data: {}", topic, controlMessage);
 
-        if(mqttClient != null && mqttClient.isConnected() && controlMessage != null && topic != null){
+                    if(mqttClient != null && mqttClient.isConnected() && controlMessage != null && topic != null){
 
-            String messagePayload = mapper.writeValueAsString(controlMessage);
+                        String messagePayload = mapper.writeValueAsString(controlMessage);
 
-            MqttMessage mqttMessage = new MqttMessage(messagePayload.getBytes());
-            mqttMessage.setQos(1);
+                        MqttMessage mqttMessage = new MqttMessage(messagePayload.getBytes());
+                        mqttMessage.setQos(1);
 
-            mqttClient.publish(topic, mqttMessage);
+                        mqttClient.publish(topic, mqttMessage);
 
-            logger.info("Data Correctly Published to topic: {}", topic);
+                        logger.info("Data Correctly Published to topic: {}", topic);
 
-        }
-        else
-            logger.error("Error: Topic or Msg = Null or MQTT Client is not Connected !");
+                    }
+                    else
+                        logger.error("Error: Topic or Msg = Null or MQTT Client is not Connected !");
+
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+
+            }
+        });
 
     }
 
