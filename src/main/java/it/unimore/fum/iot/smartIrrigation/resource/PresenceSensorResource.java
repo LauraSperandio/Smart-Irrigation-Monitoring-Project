@@ -1,6 +1,6 @@
 package it.unimore.fum.iot.smartIrrigation.resource;
 
-import it.unimore.fum.iot.smartIrrigation.model.PeopleCounterDescriptor;
+//import it.unimore.fum.iot.smartIrrigation.model.PeopleCounterDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,25 +10,29 @@ import java.util.TimerTask;
 import java.util.UUID;
 
 
-public class PresenceSensorResource extends PeopleCounterSmartObjectResource<PeopleCounterDescriptor> {
+public class PresenceSensorResource extends PeopleCounterSmartObjectResource<Integer> {
 
     private static final Logger logger = LoggerFactory.getLogger(PresenceSensorResource.class);
 
-    private PeopleCounterDescriptor updatedPeopleCounterDescriptor = new PeopleCounterDescriptor();
+//    private PeopleCounterDescriptor updatedPeopleCounterDescriptorPC = new PeopleCounterDescriptor();
 
-    private static final long UPDATE_PERIOD = 30000; //5 Seconds
+    private static final long UPDATE_PERIOD = 5000; //5 Seconds
 
     private static final long TASK_DELAY_TIME = 5000; //Seconds before starting the periodic update task
 
     public static final String RESOURCE_TYPE = "iot:peoplecountersensor:presence";
 
-    public static final PeopleCounterDescriptor UpdatedPeopleCounterDescriptor = null;
+    private Integer updatedPresenceData;
+
+//    public static final PeopleCounterDescriptor UpdatedPeopleCounterDescriptor = null;
 
     private Timer updateTimer = null;
 
     private Integer randomIn;
 
     private Integer randomOut;
+
+    private Integer personeDentro;
 
     public PresenceSensorResource() {
         super(UUID.randomUUID().toString(), PresenceSensorResource.RESOURCE_TYPE);
@@ -40,20 +44,22 @@ public class PresenceSensorResource extends PeopleCounterSmartObjectResource<Peo
         init();
     }
 
+
+
     private void init() {
         try {
 
             Random random1 = new Random();
             // genera numero casuale tra 0 e 3
-            randomIn = random1.nextInt(4);
-            updatedPeopleCounterDescriptor.setIn(randomIn);
+            this.randomIn = random1.nextInt(4);
+//            updatedPeopleCounterDescriptor.setIn(randomIn);
 
             Random random2 = new Random();
             // genera numero casuale tra 0 e 3
-            randomOut = random2.nextInt(4);
-            updatedPeopleCounterDescriptor.setOut(randomOut);
+            this.randomOut = random2.nextInt(4);
+//            updatedPeopleCounterDescriptor.setOut(randomOut);
 
-            logger.info("GPX File WayPoint correctly loaded !");
+            this.personeDentro = (this.randomIn - this.randomOut);
 
             startPeriodicEventValueUpdateTask();
 
@@ -74,14 +80,22 @@ public class PresenceSensorResource extends PeopleCounterSmartObjectResource<Peo
                     Random random1 = new Random();
                     // genera numero casuale tra 0 e 3
                     randomIn = (randomIn + random1.nextInt(4));
-                    updatedPeopleCounterDescriptor.setIn(randomIn);
+ //                   updatedPeopleCounterDescriptor.setIn(randomIn);
 
                     Random random2 = new Random();
                     // genera numero casuale tra 0 e 3
                     randomOut = (randomOut + random2.nextInt(4));
-                    updatedPeopleCounterDescriptor.setOut(randomOut);
+//                    updatedPeopleCounterDescriptor.setOut(randomOut);
 
-                    notifyUpdatePC(updatedPeopleCounterDescriptor);
+                    if(randomIn>randomOut) {
+                        personeDentro = (randomIn - randomOut);
+                    }else{
+                        personeDentro = (randomOut - randomIn);
+                    }
+                    updatedPresenceData = personeDentro;
+//                    updatedPeopleCounterDescriptor.setDiffpers(personeDentro);
+
+                    notifyUpdatePC(updatedPresenceData);
                 }
             }, TASK_DELAY_TIME, UPDATE_PERIOD);
 
@@ -91,7 +105,7 @@ public class PresenceSensorResource extends PeopleCounterSmartObjectResource<Peo
         }
     }
 
-    @Override
+/*    @Override
     public PeopleCounterDescriptor loadUpdatedValuePC() {
         return this.updatedPeopleCounterDescriptor;
     }
@@ -113,6 +127,33 @@ public class PresenceSensorResource extends PeopleCounterSmartObjectResource<Peo
                 else
                     logger.error("onDataChanged Callback -> Null Resource or Updated Value !");
             }
+        });
+
+    } */
+
+    @Override
+    public Integer loadUpdatedValuePC() {
+        return this.updatedPresenceData;
+    }
+
+    public static void main(String[] args) {
+
+        PresenceSensorResource presenceSensorResource = new PresenceSensorResource();
+        logger.info("New {} Resource Created with Id: {} ! Person in the area: {}",
+                presenceSensorResource.getType(),
+                presenceSensorResource.getId(),
+                presenceSensorResource.loadUpdatedValuePC());
+
+        //Add Resource Listener
+        presenceSensorResource.addDataListenerPC(new ResourceDataListenerPC<Integer>() {
+            @Override
+            public void onDataChanged(PeopleCounterSmartObjectResource<Integer> resource, Integer updatedValuePC) {
+                if(resource != null && updatedValuePC != null)
+                    logger.info("Device: {} -> New Presence Data Received: {}", resource.getId(), updatedValuePC);
+                else
+                    logger.error("onDataChanged Callback -> Null Resource or Updated Value !");
+            }
+
         });
 
     }

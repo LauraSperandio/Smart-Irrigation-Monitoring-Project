@@ -7,10 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.unimore.fum.iot.smartIrrigation.device.PeopCountMQTTSmartObject;
 import it.unimore.fum.iot.smartIrrigation.message.ControlMessage;
 import it.unimore.fum.iot.smartIrrigation.message.TelemetryMessage;
-import it.unimore.fum.iot.smartIrrigation.resource.BatteryEMSensorResource;
-import it.unimore.fum.iot.smartIrrigation.resource.BatteryICSensorResource;
-import it.unimore.fum.iot.smartIrrigation.resource.RainSensorResource;
-import it.unimore.fum.iot.smartIrrigation.resource.TemperatureSensorResource;
+import it.unimore.fum.iot.smartIrrigation.resource.*;
 import it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
@@ -18,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 //import org.json.*;
 
+import java.nio.charset.StandardCharsets;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,17 +40,9 @@ public class DataCollectorManagerConsumer {
     private static ObjectMapper mapper;
 
 
-    //IP Address of the target MQTT Broker
-//    private static String BROKER_ADDRESS = "155.185.228.20";
-
-    //PORT of the target MQTT Broker
-//    private static int BROKER_PORT = 7883;
-
-//    private static final String TARGET_BATTERY_TOPIC = "/iot/user/262716@studenti.unimore.it/+/env-mon/battery";
-
     public static void main(String [ ] args) {
 
-        logger.info("MQTT Consumer Tester Started ...");
+        logger.info("MQTT Data Collector & Manager Started ...");
 
         try{
 
@@ -152,12 +143,9 @@ public class DataCollectorManagerConsumer {
                         isAlarmNotifiedIRR = true;
 
 
-                        publishIrrigationControlMessage(client, MQTTConfigurationParameters.CHANGE_IRRIGATION_TOPIC, new ControlMessage(ALARM_MESSAGE_STOP_IRRIGATION_TYPE, new HashMap(){
+                        publishIrrigationControlMessage(client, MQTTConfigurationParameters.TARGET_CHANGE_IRRIGATION_TOPIC, new ControlMessage(ALARM_MESSAGE_STOP_IRRIGATION_TYPE, new HashMap(){
                             {
-                                put("accensione", false);
-                                put("policyConfiguration", "Day");
-                                put("livelloIrrigazione", "LOW");
-                                put("tipologiaIrrigazioneRotazione", false);
+                                put("stoppare irrigazione", true);
                             }
                         }));
                     }
@@ -182,12 +170,9 @@ public class DataCollectorManagerConsumer {
                         isAlarmNotifiedIRR = true;
 
 
-                        publishIrrigationControlMessage(client, MQTTConfigurationParameters.CHANGE_IRRIGATION_TOPIC, new ControlMessage(ALARM_MESSAGE_STOP_IRRIGATION_TYPE, new HashMap(){
+                        publishIrrigationControlMessage(client, MQTTConfigurationParameters.TARGET_CHANGE_IRRIGATION_TOPIC, new ControlMessage(ALARM_MESSAGE_STOP_IRRIGATION_TYPE, new HashMap(){
                             {
-                                put("accensione", false);
-                                put("policyConfiguration", "Day");
-                                put("livelloIrrigazione", "LOW");
-                                put("tipologiaIrrigazioneRotazione", false);
+                                put("stoppare irrigazione", true);
                             }
                         }));
                     }
@@ -206,32 +191,24 @@ public class DataCollectorManagerConsumer {
                 //messaged from multiple and different topic can be received with the same subscription
                 //The msg variable is a MqttMessage object containing all the information about the received message
 
-//                try{
-//                    mapper.readValue(messagePayload, PeopCountMQTTSmartObject.class);
-//                }catch (Exception e){
+                Optional<TelemetryMessage<Integer>> telemetryMessageOptional = parseTelemetryMessagePayloadPres(msg);
 
-//                }
-                Optional<TelemetryMessage<Double>> telemetryMessageOptional = parseTelemetryMessagePayload(msg);
+                if(telemetryMessageOptional.isPresent() && telemetryMessageOptional.get().getType().equals(PresenceSensorResource.RESOURCE_TYPE)){
 
-                if(telemetryMessageOptional.isPresent() && telemetryMessageOptional.get().getType().equals(RainSensorResource.RESOURCE_TYPE)){
+                    Integer newPresenceData = telemetryMessageOptional.get().getDataValue();
+                    logger.info("New Presence Data Received ! persons in the area: {}", newPresenceData);
 
-                    Double newPresenceData = telemetryMessageOptional.get().getDataValue();
-                    logger.info("New Rain Telemetry Data Received ! it's raining: {}", newPresenceData);
-
-/*                    if(newRainData && !isAlarmNotifiedIRR){
-                        logger.info("IT'S RAINING ! Sending Control Notification ...");
+                    if((newPresenceData>0) && !isAlarmNotifiedIRR && LocalTime.now().isBefore(LocalTime.parse("08:00")) && LocalTime.now().isAfter(LocalTime.parse("18:00"))){
+                        logger.info("THERE ARE PERSONS IN THE AREA ! Sending Control Notification ...");
                         isAlarmNotifiedIRR = true;
 
 
-                        publishIrrigationControlMessage(client, MQTTConfigurationParameters.CHANGE_IRRIGATION_TOPIC, new ControlMessage(ALARM_MESSAGE_STOP_IRRIGATION_TYPE, new HashMap(){
+                        publishIrrigationControlMessage(client, MQTTConfigurationParameters.TARGET_CHANGE_IRRIGATION_TOPIC, new ControlMessage(ALARM_MESSAGE_STOP_IRRIGATION_TYPE, new HashMap(){
                             {
-                                put("accensione", false);
-                                put("policyConfiguration", "Day");
-                                put("livelloIrrigazione", "LOW");
-                                put("tipologiaIrrigazioneRotazione", false);
+                                put("stoppare irrigazione", true);
                             }
                         }));
-                    } */
+                    }
                 }
             });
 
@@ -285,7 +262,7 @@ public class DataCollectorManagerConsumer {
         }
     }
 
-    private static Optional<TelemetryMessage<Double>> parseTelemetryMessagePayloadPres(MqttMessage mqttMessage){
+    private static Optional<TelemetryMessage<Integer>> parseTelemetryMessagePayloadPres(MqttMessage mqttMessage){
 
         try{
 
@@ -294,15 +271,8 @@ public class DataCollectorManagerConsumer {
 
             byte[] payloadByteArray = mqttMessage.getPayload();
             String payloadString = new String(payloadByteArray);
-//            JSONObject obj = new JSONObject(jsonString);
-//            String in = obj.getString("in");
 
-//            mapper.readValue(messagePayload, PeopCountMQTTSmartObject.class);
-
-
-
-
-            return Optional.of(mapper.readValue(payloadString, new TypeReference<TelemetryMessage<Double>>() {}));
+            return Optional.of(mapper.readValue(payloadString, new TypeReference<TelemetryMessage<Integer>>() {}));
 
 
         }catch (Exception e){

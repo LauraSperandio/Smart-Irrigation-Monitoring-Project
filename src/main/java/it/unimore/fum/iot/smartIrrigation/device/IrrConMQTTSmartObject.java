@@ -1,18 +1,23 @@
 package it.unimore.fum.iot.smartIrrigation.device;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import it.unimore.fum.iot.smartIrrigation.message.ControlMessage;
 import it.unimore.fum.iot.smartIrrigation.message.TelemetryMessage;
 import it.unimore.fum.iot.smartIrrigation.resource.*;
 import it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters;
 import org.eclipse.paho.client.mqttv3.IMqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+
 import java.util.Map;
+import java.util.Optional;
 
 import static it.unimore.fum.iot.smartIrrigation.utils.MQTTConfigurationParameters.MQTT_BASIC_TOPIC;
 
@@ -25,9 +30,11 @@ public class IrrConMQTTSmartObject {
 
     private String IrrConID;
 
-    private ObjectMapper mapper;
+    private static ObjectMapper mapper;
 
     private IMqttClient mqttClient;
+
+    private boolean isStoppedIRR = false;
 
     private Map<String, IrrigationControllerSmartObjectResource> resourceMap;
 
@@ -69,8 +76,48 @@ public class IrrConMQTTSmartObject {
 
     }
 
-    private void registerToControlChannel() {
-        //TODO
+    private void registerToControlChannel() throws MqttException {
+
+        MqttConnectOptions options = new MqttConnectOptions();
+        options.setAutomaticReconnect(true);
+        options.setCleanSession(true);
+        options.setConnectionTimeout(10);
+
+        options.setUserName(MQTTConfigurationParameters.MQTT_USERNAME);
+        options.setPassword((MQTTConfigurationParameters.MQTT_PASSWORD).toCharArray());
+
+        try{
+            //Connect to the target broker
+            this.mqttClient.connect(options);
+
+            logger.info("Connected ! Client Id: {}", this.mqttClient);
+            // subscribe to topic for rain and publish the stop to irrigation if it's raining
+            this.mqttClient.subscribe(MQTTConfigurationParameters.TARGET_CHANGE_IRRIGATION_TOPIC, (topic, msg) -> {
+                //The topic variable contain the specific topic associated to the received message. Using MQTT wildcards
+                //messaged from multiple and different topic can be received with the same subscription
+                //The msg variable is a MqttMessage object containing all the information about the received message
+
+                Optional<TelemetryMessage<Boolean>> telemetryMessageOptional = parseTelemetryMessagePayloadBool(msg);
+
+                if(telemetryMessageOptional.isPresent() && telemetryMessageOptional.get().getType().equals(PresenceSensorResource.RESOURCE_TYPE)){
+
+                    Boolean newStopIrr = telemetryMessageOptional.get().getDataValue();
+                    logger.info("New Rain Telemetry Data Received ! it's raining: {}", newStopIrr);
+
+                    if(newStopIrr && !isStoppedIRR){
+                        logger.info("IT'S RAINING ! Sending Control Notification ...");
+                        isStoppedIRR = true;
+    //                    accensione = false;
+
+    //                    updatedIrrigationControllerDescriptor.setAccensione(accensione);
+
+                    }
+                }
+            });
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
     }
 
     private void registerToAvailableResources(){
@@ -140,6 +187,24 @@ public class IrrConMQTTSmartObject {
             }
         });
 
+    }
+
+    private static Optional<TelemetryMessage<Boolean>> parseTelemetryMessagePayloadBool(MqttMessage mqttMessage){
+
+        try{
+
+            if(mqttMessage == null)
+                return Optional.empty();
+
+            byte[] payloadByteArray = mqttMessage.getPayload();
+            String payloadString = new String(payloadByteArray);
+
+            return Optional.of(mapper.readValue(payloadString, new TypeReference<TelemetryMessage<Boolean>>() {}));
+
+
+        }catch (Exception e){
+            return Optional.empty();
+        }
     }
 
 }

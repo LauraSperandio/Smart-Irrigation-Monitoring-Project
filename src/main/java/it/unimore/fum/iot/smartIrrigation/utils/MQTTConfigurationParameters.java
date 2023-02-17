@@ -19,6 +19,7 @@ public class MQTTConfigurationParameters {
     public static final String TARGET_TEMPERATURE_TOPIC = "/iot/user/262716@studenti.unimore.it/+/env-mon/temperature";
     public static final String TARGET_RAIN_TOPIC = "/iot/user/262716@studenti.unimore.it/+/env-mon/rain";
     public static final String TARGET_PRESENCE_TOPIC = "/iot/user/262716@studenti.unimore.it/+/peop-count/presence";
+    public static final String TARGET_CHANGE_IRRIGATION_TOPIC = "/iot/user/262716@studenti.unimore.it/+/irr-change";
 
 
 
