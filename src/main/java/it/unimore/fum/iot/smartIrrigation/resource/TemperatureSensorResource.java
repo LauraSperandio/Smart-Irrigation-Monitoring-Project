@@ -78,8 +78,6 @@ public class TemperatureSensorResource extends EnvironmentalMonitoringSmartObjec
 
                     }
 
-                    //logger.info("Updated Temperature: {}", updatedTemperature);
-
                     if (updatedTemperature < 10.0) {
                         updatedTemperature = 10.0;
                     } else if (updatedTemperature > 35.0) {

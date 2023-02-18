@@ -21,9 +21,6 @@ public class PeopCountSmartObjectProcess {
 
     private static final Logger logger = LoggerFactory.getLogger(PeopCountSmartObjectProcess.class);
 
-//    private static String MQTT_BROKER_IP = "127.0.0.1";
-
-//    private static int MQTT_BROKER_PORT = 1883;
 
     public static void main(String[] args) {
 

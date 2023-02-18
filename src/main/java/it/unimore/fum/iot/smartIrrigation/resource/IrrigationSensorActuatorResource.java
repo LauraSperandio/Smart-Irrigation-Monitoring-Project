@@ -52,19 +52,6 @@ public class IrrigationSensorActuatorResource extends IrrigationControllerSmartO
     private void init() {
         try {
 
-/*            accensione = true;
-            policyConfiguration = "Week Day";
-            livelloIrrigazione = "Medium";
-            tipologiaIrrigazioneRotazione = "Rotation ON";
-
-            updatedIrrigationControllerDescriptor.setPolicyConfiguration(accensione);
-
-            updatedIrrigationControllerDescriptor.setPolicyConfiguration(policyConfiguration);
-
-            updatedIrrigationControllerDescriptor.setLivelloIrrigazione(livelloIrrigazione);
-
-            updatedIrrigationControllerDescriptor.setTipologiaIrrigazione(tipologiaIrrigazioneRotazione);
-*/
             logger.info("Configuration automatic policy correctly loaded !");
 
             startPeriodicEventValueUpdateTask();

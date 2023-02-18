@@ -78,7 +78,6 @@ public class HumiditySensorResource extends EnvironmentalMonitoringSmartObjectRe
 
                     }
 
-                    //logger.info("Updated Humidity: {}", updatedTemperature);
 
                     if (updatedHumidity < 0) {
                         updatedHumidity = 0;
